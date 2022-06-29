@@ -22,9 +22,8 @@
 
 #include "tests/TestClearColor.h"
 
-
 // main
-int main(void)
+int main_imgui(void)
 {
     GLFWwindow* window;
 
@@ -53,7 +52,7 @@ int main(void)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGuiIO& io = ImGui::GetIO();
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     // Setup Platform/Renderer backends
