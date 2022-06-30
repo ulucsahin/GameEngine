@@ -18,18 +18,38 @@
 
 #include "tests/TestClearColor.h"
 
+#include "ResourceHandling/ModelLoader.h"
+
+bool enableCore = false;
+
 // main
 int main(void)
 {
     GLFWwindow* window;
 
+    const char* objFilePath = "res/models/dummy2.obj";
+    std::vector<glm::vec3> vertices;
+    std::vector<glm::vec2> uvs;
+    std::vector<glm::vec2> texture_coords;
+    std::vector<glm::vec3> normals;
+    std::vector<unsigned int> indices;
+    //bool success = ModelLoader::LoadObj(objFilePath, vertices, uvs, normals, indices);
+    bool success = ModelLoader::LoadObj2(objFilePath, vertices, texture_coords, indices);
+
+   
+
+   
     /* Initialize the library */
     if (!glfwInit())
         return -1;
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    if (enableCore)
+    {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    }
+    
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
@@ -51,40 +71,42 @@ int main(void)
     std::cout << glGetString(GL_VERSION) << std::endl;
     {
         // texture coordinates added
-        float positions[] = {
-         -50.0f, -50.0f, 0.0f, 0.0f, // 0
-          50.0f, -50.0f, 1.0f, 0.0f, // 1
-          50.0f,  50.0f, 1.0f, 1.0f, // 2
-         -50.0f,  50.0f, 0.0f, 1.0f // 3
-        };
+        //float positions[] = {
+        // -50.0f, -50.0f, 0.0f, 0.0f, // 0
+        //  50.0f, -50.0f, 1.0f, 0.0f, // 1
+        //  50.0f,  50.0f, 1.0f, 1.0f, // 2
+        // -50.0f,  50.0f, 0.0f, 1.0f // 3
+        //};
 
-        // you can also use char short etc. to save memory, but it has to be unsigned
-        unsigned int indices[] = {
-            0, 1, 2,
-            3, 2, 0
-        };
+        //// you can also use char short etc. to save memory, but it has to be unsigned
+        //unsigned int indices[] = {
+        //    0, 1, 2,
+        //    3, 2, 0
+        //};
 
         // enable blending for alpha channel
         GLCall(glEnable(GL_BLEND));
         GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
 
-            unsigned int vao;
+        unsigned int vao;
         GLCall(glGenVertexArrays(1, &vao));
         GLCall(glBindVertexArray(vao));
 
         VertexArray va;
         int numVertex = 4;
         int floatsPerVertex = 4;
-        VertexBuffer vb(positions, numVertex * floatsPerVertex * sizeof(float));
+        //VertexBuffer vb(positions, numVertex * floatsPerVertex * sizeof(float));
+        VertexBuffer vb(&vertices[0], vertices.size() * sizeof(glm::vec3));
         VertexBufferLayout layout;
         layout.Push<float>(2);
         layout.Push<float>(2);
         va.AddBuffer(vb, layout);
 
-        IndexBuffer ib(indices, 6);
+        //IndexBuffer ib(indices, 6);
+        unsigned int* indicesArray = &indices[0];
+        IndexBuffer ib(indicesArray, indices.size());
 
         // MVP: model view projection matrixes
-        // 
         glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
         glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.f));
 
@@ -110,7 +132,7 @@ int main(void)
         float r = 0.0f;
         float increment = 0.05f;
         /* Loop until the user closes the window */
-        float f;
+
 
         test::TestClearColor test;
 
@@ -120,7 +142,6 @@ int main(void)
 
             test.OnUpdate(0.0f);
             test.OnRender();
-
 
             {
                 glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA); // ? 
@@ -147,8 +168,6 @@ int main(void)
             else if (r < 0.0f)
                 increment = 0.05f;
             r += increment;
-
-
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
