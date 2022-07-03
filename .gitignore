@@ -34,7 +34,12 @@
 #
 .vs
 Debug
+Release
+x64
+x86
 Dependencies
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
+GameEngine/Debug
+GameEngine/x64
