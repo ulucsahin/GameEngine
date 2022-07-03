@@ -186,7 +186,7 @@ int main(void)
 
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            glLoadIdentity();
+            
             Translation::Rotate(Model, { 0.1f, 0.1f, 0.1f });
             //Model = Model * rotationMatrix;
             // Our ModelViewProjection : multiplication of our 3 matrices
