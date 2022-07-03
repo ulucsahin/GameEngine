@@ -35,7 +35,6 @@
 .vs
 Debug
 Dependencies
-*.sln
 *.vcxproj
 *.vcxproj.filters
 *.vcxproj.user
