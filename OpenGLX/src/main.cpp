@@ -1,60 +1,58 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <stdio.h>
+#include <stdlib.h>
 
-#include "Renderer.h"
-
-#include "VertexBuffer.h"
-#include "IndexBuffer.h"
-#include "VertexArray.h"
-#include "Shader.h"
-#include "Texture.h"
-
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-
-#include "tests/TestClearColor.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp> // after <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "ResourceHandling/ModelLoader.h"
+#include "ResourceHandling/Texture.h"
+#include "ErrorHandling/ErrorHandler.h"
+#include "Shaders/ShaderHandler.h"
+
+#include "VertexBuffer.h"
+#include "BufferLayout.h"
+
+#include "Translation.h"
+
+#include "stb_image/stb_image.h"
+
+#include <numbers>
+#include <cmath>
 
 bool enableCore = false;
 
 // main
 int main(void)
 {
-    GLFWwindow* window;
+    stbi_set_flip_vertically_on_load(1);
 
-    const char* objFilePath = "res/models/dummy2.obj";
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> uvs;
-    std::vector<glm::vec2> texture_coords;
-    std::vector<glm::vec3> normals;
-    std::vector<unsigned int> indices;
-    //bool success = ModelLoader::LoadObj(objFilePath, vertices, uvs, normals, indices);
-    bool success = ModelLoader::LoadObj2(objFilePath, vertices, texture_coords, indices);
-
-   
-
-   
-    /* Initialize the library */
     if (!glfwInit())
+    {
+        fprintf(stderr, "Failed to initialize GLFW\n");
         return -1;
+    }
 
     if (enableCore)
     {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    }
+    } 
     
-
-    /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
-    if (!window)
+    // Create window 
+     GLFWwindow* window = glfwCreateWindow(1024, 768, "Tutorial 01", NULL, NULL);
+    if (window == NULL) 
     {
+        fprintf(stderr, "Failed to open GLFW window. \n");
         glfwTerminate();
         return -1;
     }
@@ -69,116 +67,157 @@ int main(void)
         std::cout << "ERROR!" << std::endl;
 
     std::cout << glGetString(GL_VERSION) << std::endl;
-    {
-        // texture coordinates added
-        //float positions[] = {
-        // -50.0f, -50.0f, 0.0f, 0.0f, // 0
-        //  50.0f, -50.0f, 1.0f, 0.0f, // 1
-        //  50.0f,  50.0f, 1.0f, 1.0f, // 2
-        // -50.0f,  50.0f, 0.0f, 1.0f // 3
-        //};
 
-        //// you can also use char short etc. to save memory, but it has to be unsigned
-        //unsigned int indices[] = {
-        //    0, 1, 2,
-        //    3, 2, 0
-        //};
+    {
+        VertexBuffer bufferManager;
+        BufferLayout bufferLayout;
 
         // enable blending for alpha channel
         GLCall(glEnable(GL_BLEND));
-        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
+        GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        unsigned int vao;
-        GLCall(glGenVertexArrays(1, &vao));
-        GLCall(glBindVertexArray(vao));
+        // VAO
+        GLuint VertexArrayID;
+        glGenVertexArrays(1, &VertexArrayID);
+        glBindVertexArray(VertexArrayID);
 
-        VertexArray va;
-        int numVertex = 4;
-        int floatsPerVertex = 4;
-        //VertexBuffer vb(positions, numVertex * floatsPerVertex * sizeof(float));
-        VertexBuffer vb(&vertices[0], vertices.size() * sizeof(glm::vec3));
-        VertexBufferLayout layout;
-        layout.Push<float>(2);
-        layout.Push<float>(2);
-        va.AddBuffer(vb, layout);
+        // Load Model 
+        std::vector<GLfloat> vertices;
+        std::vector<int> indexes;
+        std::vector<float> UV;
+        vertices.reserve(50000); // todo: don't use vectors
+        ModelLoader::LoadModel3("res/models/dummy2.obj", vertices, indexes, UV);
+        
+        // Vertex
+        GLuint vertexbuffer;
+        static const GLfloat* g_vertex_buffer_data = &vertices[0];
+        bufferManager.GenerateBuffer(vertexbuffer, g_vertex_buffer_data, vertices.size() * sizeof(GLfloat), GL_ARRAY_BUFFER);
+        
+        // Index
+        GLuint indexBuffer;
+        static const int* g_index_buffer_data = &indexes[0];
+        bufferManager.GenerateBufferi(indexBuffer, g_index_buffer_data, indexes.size() * sizeof(GLfloat), GL_ELEMENT_ARRAY_BUFFER);
 
-        //IndexBuffer ib(indices, 6);
-        unsigned int* indicesArray = &indices[0];
-        IndexBuffer ib(indicesArray, indices.size());
+        // UV
+        GLuint uvBuffer;
+        static const GLfloat* g_uv_buffer_data = &UV[0];
+        bufferManager.GenerateBuffer(uvBuffer, g_uv_buffer_data, UV.size() * sizeof(GLfloat), GL_ARRAY_BUFFER);
+        
+        // rotation example
+        /*float rotation = 30.f;
+        float cosTheta = std::cos(rotation * toRadians);
+        float sinTheta = std::sin(rotation * toRadians);
+        float rot[16] = {
+            1,     0,        0,     0,
+            0, cosTheta, -sinTheta, 0,
+            0, sinTheta, cosTheta,  0,
+            0,    0,        0,      1
+        };
 
-        // MVP: model view projection matrixes
-        glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-        glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0.f, 0.f, 0.f));
+        glm::mat4 rotationMatrix = glm::make_mat4(rot);
+        std::cout << cosTheta << std::endl;*/
 
-        Shader shader("res/shaders/Basic.shader");
-        shader.Bind();
-        shader.SetUniform4f("u_Color", 0.2f, 0.3f, 0.8f, 1.0f);
+        // Projection matrix : 45° Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+        GLfloat FoV = 60.f;
+        GLfloat aspectRatio = 4.f / 3.f;
+        GLfloat near = 0.1f;
+        GLfloat far = 100.f;
+        glm::mat4 Projection = glm::perspective(glm::radians(FoV), aspectRatio, near, far);
 
+        // Camera matrix
+        glm::mat4 View = glm::lookAt(
+            glm::vec3(0, 0, -3), // Camera is at (4, 3, 3), in World Space
+            glm::vec3(0, 0, 0), // and looks at the origin
+            glm::vec3(0, 1, 0)  // Head is up (set to 0, -1, 0 to look upside-down)
+        );
+        
+        // Model matrix : an identity matrix (model will be at the origin)
+        glm::mat4 Model = glm::mat4(1.0f);
+        
+        //Translation::Rotate(Model, {30.f, 30.f, 30.f});
+        ////Model = Model * rotationMatrix;
+        //// Our ModelViewProjection : multiplication of our 3 matrices
+        //glm::mat4 mvp = Projection * View * Model; // Remember, matrix multiplication is the other way around
+
+
+        
+
+        // load shaders
+        ShaderHandler shaderHandler;
+        unsigned int ProgramID = shaderHandler.GetProgramID();
+        ShaderInfo vertexShader = shaderHandler.LoadShader("res/shaders/VertexShader.shader", GL_VERTEX_SHADER);
+        ShaderInfo fragmentShader = shaderHandler.LoadShader("res/shaders/FragmentShader.shader", GL_FRAGMENT_SHADER);
+
+        // Compile Shaders
+        shaderHandler.CompileAttachShader(vertexShader);
+        shaderHandler.CompileAttachShader(fragmentShader);
+
+        // Link program
+        GLCall(glLinkProgram(ProgramID));
+
+        // Detach shaders
+        GLCall(glDetachShader(ProgramID, vertexShader.ID));
+        GLCall(glDetachShader(ProgramID, fragmentShader.ID));
+        GLCall(glDeleteShader(vertexShader.ID));
+        GLCall(glDeleteShader(fragmentShader.ID));
+        
+        // Texture
         Texture texture("res/textures/lmao.png");
-        unsigned int slot = 0;
-        texture.Bind(slot);
-        shader.SetUniform1i("u_Texture", slot);
+        texture.Bind();
 
-        va.Unbind();
-        shader.Unbind();
-        vb.Unbind();
-        ib.Unbind();
+        // Get a handle for our "MVP" uniform
+        // Only during the initialisation
+        GLuint MVPID = glGetUniformLocation(ProgramID, "MVP");
 
-        Renderer renderer;
-
-        glm::vec3 translationA(200.f, 200.f, 0.f);
-        glm::vec3 translationB(400.f, 200.f, 0.f);
-
-        float r = 0.0f;
-        float increment = 0.05f;
-        /* Loop until the user closes the window */
-
-
-        test::TestClearColor test;
-
+        // Enable depth test
+        GLCall(glEnable(GL_DEPTH_TEST));
+        // Accept fragment if it closer to the camera than the former one
+        GLCall(glDepthFunc(GL_LESS));
+        glEnable(GL_CULL_FACE);
+        
+        double currentTime = 0.0;
+        double lastTime = 0.0;
         while (!glfwWindowShouldClose(window))
         {
-            renderer.Clear();
+            currentTime = glfwGetTime();
+            float deltaTime = float(currentTime - lastTime);
+            lastTime = currentTime; 
+            //std::cout << "deltaTime: " << deltaTime << std::endl;
 
-            test.OnUpdate(0.0f);
-            test.OnRender();
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            glLoadIdentity();
+            Translation::Rotate(Model, { 0.1f, 0.1f, 0.1f });
+            //Model = Model * rotationMatrix;
+            // Our ModelViewProjection : multiplication of our 3 matrices
+            glm::mat4 mvp = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
-            {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA); // ? 
-                glm::mat4 mvp = proj * view * model; // order matters
-                shader.Bind();
-                shader.SetUniformMat4f("u_MVP", mvp);
-                renderer.Draw(va, ib, shader);
-            }
+            //std::cout << xpos << " " << ypos << std::endl;
 
-            shader.Bind();
-            {
-                glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB); // ? 
-                glm::mat4 mvp = proj * view * model; // order matters
-                shader.Bind();
-                shader.SetUniformMat4f("u_MVP", mvp);
-                renderer.Draw(va, ib, shader);
-            }
+            GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+            GLCall(glUseProgram(ProgramID));
 
+            bufferLayout.GenerateLayout(0, vertexbuffer, GL_ARRAY_BUFFER);
+            bufferLayout.GenerateLayout(1, uvBuffer, GL_TEXTURE_BUFFER);
+       
+            // Send our transformation to the currently bound shader, in the "MVP" uniform
+            // This is done in the main loop since each model will have a different MVP matrix (At least for the M part)
+            GLCall(glUniformMatrix4fv(MVPID, 1, GL_FALSE, &mvp[0][0]));
 
-            //GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
-
-            if (r > 1.0f)
-                increment = -0.05f;
-            else if (r < 0.0f)
-                increment = 0.05f;
-            r += increment;
+            // draw call
+            // GLCall(glDrawArrays(GL_TRIANGLES, 0, vertices.size())); // without indexes
+            GLCall(glDrawElements(GL_TRIANGLES, indexes.size(), GL_UNSIGNED_INT, nullptr)); // with indexes
+            GLCall(glDisableVertexAttribArray(0));
 
             /* Swap front and back buffers */
-            glfwSwapBuffers(window);
+            GLCall(glfwSwapBuffers(window));
 
-            /* Poll for and process events */
-            glfwPollEvents();
+            ///* Poll for and process events */
+            GLCall(glfwPollEvents());
         }
-
     }
 
     // Cleanup
-    glfwTerminate();
+    GLCall(glfwTerminate());
     return 0;
 }

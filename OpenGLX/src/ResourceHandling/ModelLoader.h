@@ -17,6 +17,9 @@ public:
 		std::vector<glm::vec2>& out_texture_coords,
 		std::vector<unsigned int>& out_faces);
 		
-
+	static void LoadModel3(const char* filepath,
+		std::vector<float>& outVertices,
+		std::vector<int>& outFaceIndexes,
+		std::vector<float>& outUV);
 
 };

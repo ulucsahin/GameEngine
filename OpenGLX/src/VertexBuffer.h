@@ -2,12 +2,9 @@
 
 class VertexBuffer
 {
-private:
-	unsigned int m_RendererID;
 public:
-	VertexBuffer(const void* data, unsigned int size);
-	~VertexBuffer();
-
-	void Bind() const;
-	void Unbind() const;
+	void GenerateBuffer(unsigned int& id, const float* data, int size, int type);
+	void GenerateBufferi(unsigned int& id, const int* data, int size, int type);
+private:
 };
+

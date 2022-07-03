@@ -1,25 +1,17 @@
 #include "VertexBuffer.h"
+#include <GL/glew.h>
 
-#include "Renderer.h"
 
-VertexBuffer::VertexBuffer(const void* data, unsigned int size)
+void VertexBuffer::GenerateBuffer(unsigned int& id, const float* data, int size, int type)
 {
-    GLCall(glGenBuffers(1, &m_RendererID)); // generate buffer
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID)); // select buffer
-    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
+    glGenBuffers(1, &id); // Generate 1 buffer, put the resulting identifier in vertexbuffer
+    glBindBuffer(type, id); // The following commands will talk about our 'vertexbuffer' buffer
+    glBufferData(type, size, data, GL_STATIC_DRAW); // Give our vertices to OpenGL.
 }
 
-VertexBuffer::~VertexBuffer()
+void VertexBuffer::GenerateBufferi(unsigned int& id, const int* data, int size, int type)
 {
-    GLCall(glDeleteBuffers(1, &m_RendererID));
-}
-
-void VertexBuffer::Bind() const
-{
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, m_RendererID));
-}
-
-void VertexBuffer::Unbind() const
-{
-    GLCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    glGenBuffers(1, &id); // Generate 1 buffer, put the resulting identifier in vertexbuffer
+    glBindBuffer(type, id); // The following commands will talk about our 'vertexbuffer' buffer
+    glBufferData(type, size, data, GL_STATIC_DRAW); // Give our vertices to OpenGL.
 }

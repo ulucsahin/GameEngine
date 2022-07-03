@@ -104,7 +104,7 @@ bool ModelLoader::LoadObj2(const char* filepath,
     std::vector<unsigned int>& out_faces)
 {
     std::vector<glm::vec3> vertices;
-    std::vector<glm::vec2> texture;
+    std::vector<glm::vec2> UV;
     std::vector<int> faceIndex;
     std::vector<int> textureIndex;
 
@@ -138,7 +138,7 @@ bool ModelLoader::LoadObj2(const char* filepath,
             int U, V;
             v >> U; v >> V;
             tex = glm::vec2(U, V);
-            texture.push_back(tex);
+            UV.push_back(tex);
         }
         //check for faces
         else if (line.substr(0, 2) == "f ")
@@ -156,52 +156,105 @@ bool ModelLoader::LoadObj2(const char* filepath,
         }
     }
 
-    //the mesh data is finally calculated here
-    for (unsigned int i = 0; i < faceIndex.size(); i++)
-    {
-        glm::vec3 meshData;
-        glm::vec2 texData;
-        meshData = glm::vec3(vertices[faceIndex[i]].x, vertices[faceIndex[i]].y, vertices[faceIndex[i]].z);
-        texData = glm::vec2(texture[textureIndex[i]].x, texture[textureIndex[i]].y);
-        out_vertices.push_back(meshData);
-        out_texture_coords.push_back(texData);
-    }
-
-    //FILE* file;
-
-    //errno_t err = fopen_s(&file, filepath, "r");
-    //if (file == NULL)
+    ////the mesh data is finally calculated here
+    //for (unsigned int i = 0; i < faceIndex.size(); i++)
     //{
-    //    printf("Impossible to open the file !\n");
-    //    return false;
+    //    glm::vec3 meshData;
+    //    glm::vec2 texData;
+    //    meshData = glm::vec3(vertices[faceIndex[i]].x, vertices[faceIndex[i]].y, vertices[faceIndex[i]].z);
+    //    texData = glm::vec2(texture[textureIndex[i]].x, texture[textureIndex[i]].y);
+    //    out_vertices.push_back(meshData);
+    //    out_texture_coords.push_back(texData);
     //}
 
-    //// loop over lines
-    //int debugCount = 0;
-    //while (true)
-    //{
-    //    char lineHeader[512];
-    //    // read the first word of the line
-    //    int res = fscanf_s(file, "%s", lineHeader, _countof(lineHeader));
-
-    //    if (res == EOF)
-    //        break; // EOF = End Of File. Quit the loop.
-
-    //    //std::cout << lineHeader << "========" << std::endl;
-
-    //    // vertice
-    //    if (strcmp(lineHeader, "v"))
-    //    {   
-    //        std::cout << "lineHeader:" << lineHeader << std::endl;
-    //        std::cout << "vertice" << std::endl;
-    //    }
-
-
-
-    //    debugCount++;
-    //    if (debugCount == 100)
-    //        exit(111);
-    //}
-
+  
     return true;
 }
+
+void ModelLoader::LoadModel3(const char* filepath,
+    std::vector<float>& outVertices,
+    std::vector<int>& outFaceIndexes,
+    std::vector<float>& outUV)
+{
+    outVertices = {};
+    outFaceIndexes = {};
+
+    std::vector<glm::vec3> intermediateVertices = {};
+    std::vector<glm::vec2> intermediateUV = {};
+    std::vector<int> uvIndices = {};
+
+    std::ifstream in(filepath, std::ios::in);
+    if (!in)
+    {
+        std::cerr << "Cannot open " << filepath << std::endl;
+        exit(1);
+    }
+
+    std::string line;
+    while (std::getline(in, line))
+    {
+        
+        if (line.substr(0, 2) == "v ")
+        {
+            std::istringstream v(line.substr(2));
+            glm::vec3 vert;
+            float x, y, z;
+            v >> x;
+            v >> y;
+            v >> z;
+            //glm::vec3 tmp(x, y, z);
+            //intermediateVertices.push_back(tmp);
+            outVertices.push_back(x);
+            outVertices.push_back(y);
+            outVertices.push_back(z);
+
+            //std::cout << "x: " << x << " y: " << y << " z: " << z << std::endl;
+        }
+        //check for faces
+        else if (line.substr(0, 2) == "f ")
+        {
+            int a, a1, a2, b, b1, b2, c, c1, c2; 
+
+            const char* chh = line.c_str();
+            sscanf(chh, "f %i/%i/%i %i/%i/%i %i/%i/%i", &a, &a1, &a2, &b, &b1, &b2, &c, &c1, &c2); //here it read the line start with f and store the corresponding values in the variables
+            a--; a1--;
+            b--; b1--;
+            c--; c1--;
+
+            outFaceIndexes.push_back(a); uvIndices.push_back(a1);
+            outFaceIndexes.push_back(b); uvIndices.push_back(b1);
+            outFaceIndexes.push_back(c); uvIndices.push_back(c1);
+            
+        }
+        else if (line.substr(0, 2) == "vt")
+        {
+            std::istringstream v(line.substr(3));
+            glm::vec2 uv;
+            int U, V;
+            v >> U; v >> V;
+            //uv = glm::vec2(U, V);
+            //intermediateUV.push_back(uv);
+            outUV.push_back(U);
+            outUV.push_back(V);
+
+        }
+
+    }
+
+    //the mesh data is finally calculated here (not optimized)
+    for (unsigned int i = 0; i < outFaceIndexes.size(); i++)
+    {
+        // we don't need this since we are using index buffer
+        //outVertices.push_back(intermediateVertices[outFaceIndexes[i]].x);
+        //outVertices.push_back(intermediateVertices[outFaceIndexes[i]].y);
+        //outVertices.push_back(intermediateVertices[outFaceIndexes[i]].z);
+        //outFaceIndexes.push_back(faces[i].x);
+
+        // outUV.push_back(intermediateUV[uvIndices[i]].x);
+        // outUV.push_back(intermediateUV[uvIndices[i]].y);
+
+    }
+
+}
+
+
