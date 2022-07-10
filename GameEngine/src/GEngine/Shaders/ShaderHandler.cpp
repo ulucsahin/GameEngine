@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "ErrorHandling/ErrorHandler.h"
+#include "GEngine/ErrorHandling/ErrorHandler.h"
 
 
 ShaderHandler::ShaderHandler()

@@ -6,7 +6,7 @@ extern GEngine::Application* GEngine::CreateApplication();
 
 int main(int argc, char** argv)
 {
-	printf("GEngine Starting!");
+	printf("GEngine Starting!\n");
 	auto app = GEngine::CreateApplication();
 	app->Run();
 	delete app;

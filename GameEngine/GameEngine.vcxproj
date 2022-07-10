@@ -145,15 +145,17 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="src\GEngine\Renderers\OpenGL.h" />
+    <ClInclude Include="src\GEngine\Renderers\Renderer.h" />
     <ClInclude Include="src\BufferLayout.h" />
-    <ClInclude Include="src\ErrorHandling\ErrorHandler.h" />
+    <ClInclude Include="src\GEngine\ErrorHandling\ErrorHandler.h" />
     <ClInclude Include="src\GEngine.h" />
     <ClInclude Include="src\GEngine\Application.h" />
     <ClInclude Include="src\GEngine\Core.h" />
     <ClInclude Include="src\GEngine\EntryPoint.h" />
-    <ClInclude Include="src\ResourceHandling\ModelLoader.h" />
-    <ClInclude Include="src\ResourceHandling\Texture.h" />
-    <ClInclude Include="src\Shaders\ShaderHandler.h" />
+    <ClInclude Include="src\GEngine\ResourceHandling\ModelLoader.h" />
+    <ClInclude Include="src\GEngine\ResourceHandling\Texture.h" />
+    <ClInclude Include="src\GEngine\Shaders\ShaderHandler.h" />
     <ClInclude Include="src\Translation.h" />
     <ClInclude Include="src\VertexBuffer.h" />
     <ClInclude Include="src\vendor\glm\simd\common.h" />
@@ -178,15 +180,16 @@
     <ClInclude Include="src\vendor\stb_image\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\GEngine\Renderers\OpenGL.cpp" />
+    <ClCompile Include="src\GEngine\Renderers\Renderer.cpp" />
     <ClCompile Include="src\BufferLayout.cpp" />
-    <ClCompile Include="src\ErrorHandling\ErrorHandler.cpp" />
+    <ClCompile Include="src\GEngine\ErrorHandling\ErrorHandler.cpp" />
     <ClCompile Include="src\GEngine\Application.cpp" />
-    <ClCompile Include="src\ResourceHandling\ModelLoader.cpp" />
-    <ClCompile Include="src\ResourceHandling\Texture.cpp" />
-    <ClCompile Include="src\Shaders\ShaderHandler.cpp" />
+    <ClCompile Include="src\GEngine\ResourceHandling\ModelLoader.cpp" />
+    <ClCompile Include="src\GEngine\ResourceHandling\Texture.cpp" />
+    <ClCompile Include="src\GEngine\Shaders\ShaderHandler.cpp" />
     <ClCompile Include="src\Translation.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vendor\glm\detail\glm.cpp" />
     <ClCompile Include="src\vendor\imgui\_main.cpp" />
     <ClCompile Include="src\vendor\imgui\imgui.cpp" />

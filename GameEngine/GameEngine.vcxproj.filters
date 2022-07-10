@@ -34,7 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\BufferLayout.h" />
-    <ClInclude Include="src\ErrorHandling\ErrorHandler.h">
+    <ClInclude Include="src\GEngine\ErrorHandling\ErrorHandler.h">
       <Filter>ErrorHandling</Filter>
     </ClInclude>
     <ClInclude Include="src\GEngine.h" />
@@ -47,13 +47,13 @@
     <ClInclude Include="src\GEngine\EntryPoint.h">
       <Filter>GEngine</Filter>
     </ClInclude>
-    <ClInclude Include="src\ResourceHandling\ModelLoader.h">
+    <ClInclude Include="src\GEngine\ResourceHandling\ModelLoader.h">
       <Filter>ResourceHandling</Filter>
     </ClInclude>
-    <ClInclude Include="src\ResourceHandling\Texture.h">
+    <ClInclude Include="src\GEngine\ResourceHandling\Texture.h">
       <Filter>ResourceHandling</Filter>
     </ClInclude>
-    <ClInclude Include="src\Shaders\ShaderHandler.h">
+    <ClInclude Include="src\GEngine\Shaders\ShaderHandler.h">
       <Filter>Shaders</Filter>
     </ClInclude>
     <ClInclude Include="src\Translation.h" />
@@ -118,27 +118,28 @@
     <ClInclude Include="src\vendor\stb_image\stb_image.h">
       <Filter>vendor\stb_image</Filter>
     </ClInclude>
+    <ClInclude Include="src\GEngine\Renderers\Renderer.h" />
+    <ClInclude Include="src\GEngine\Renderers\OpenGL.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\BufferLayout.cpp" />
-    <ClCompile Include="src\ErrorHandling\ErrorHandler.cpp">
+    <ClCompile Include="src\GEngine\ErrorHandling\ErrorHandler.cpp">
       <Filter>ErrorHandling</Filter>
     </ClCompile>
     <ClCompile Include="src\GEngine\Application.cpp">
       <Filter>GEngine</Filter>
     </ClCompile>
-    <ClCompile Include="src\ResourceHandling\ModelLoader.cpp">
+    <ClCompile Include="src\GEngine\ResourceHandling\ModelLoader.cpp">
       <Filter>ResourceHandling</Filter>
     </ClCompile>
-    <ClCompile Include="src\ResourceHandling\Texture.cpp">
+    <ClCompile Include="src\GEngine\ResourceHandling\Texture.cpp">
       <Filter>ResourceHandling</Filter>
     </ClCompile>
-    <ClCompile Include="src\Shaders\ShaderHandler.cpp">
+    <ClCompile Include="src\GEngine\Shaders\ShaderHandler.cpp">
       <Filter>Shaders</Filter>
     </ClCompile>
     <ClCompile Include="src\Translation.cpp" />
     <ClCompile Include="src\VertexBuffer.cpp" />
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\vendor\glm\detail\glm.cpp">
       <Filter>vendor\glm\detail</Filter>
     </ClCompile>
@@ -169,5 +170,7 @@
     <ClCompile Include="src\vendor\stb_image\stb_image.cpp">
       <Filter>vendor\stb_image</Filter>
     </ClCompile>
+    <ClCompile Include="src\GEngine\Renderers\Renderer.cpp" />
+    <ClCompile Include="src\GEngine\Renderers\OpenGL.cpp" />
   </ItemGroup>
 </Project>
